@@ -87,7 +87,7 @@ async function deletePoints(userId: string, cost: number): Promise<boolean>{
                 //Enough points
 
                 //Update the points
-                await userRef.set({
+                await userRef.update({
                     'points': newPoint
                 });
 
@@ -103,8 +103,77 @@ async function deletePoints(userId: string, cost: number): Promise<boolean>{
 
 }
 
-
 function onlyLetters(str: string): boolean{
     const regex = /^[A-Za-z0-9]+$/g;
     return regex.test(str);
+}
+
+
+//Mark an earned reward as seen
+export const seenEarnedReward  = functions.https.onCall(async (data, context) => {
+    const userId = context?.auth?.uid;
+    const earnedRewardId = data['earnedRewardId'];
+
+    if(userId && earnedRewardId) {
+        const earnedRewardsRef = admin.firestore().doc(`users/${userId}/earned_rewards/${earnedRewardId}`);
+        await earnedRewardsRef.update({
+           'displayed': true
+        });
+        return {
+            status: 'Success'
+        }
+    }
+    return {
+        status: 'Failed'
+    }
+
+});
+
+//TESTING ONLY
+export const testAddPoints = functions.https.onCall(async (data, context) => {
+    const userId = context?.auth?.uid;
+
+    if(userId){
+        const result = await addPoints(userId, 100);
+
+        if(result){
+            return {
+                status: 'Success'
+            }
+        }
+    }
+
+    return {
+        status: 'Failed'
+    }
+});
+
+async function addPoints(userId: string, amount: number): Promise<boolean>{
+    const userRef = admin.firestore().doc(`users/${userId}`);
+    const user = await userRef.get();
+    const userData = user.data();
+
+    if(user.exists){
+        //Delete points
+        if(userData){
+            let point = userData['points'];
+            let newPoint = point + amount;
+            //Update the points
+            await userRef.set({
+                'points': newPoint
+            });
+
+            //Add to earned rewards
+            const earnedRewardsRef = userRef.collection('earned_rewards');
+            await earnedRewardsRef.add({
+                'displayed': false,
+                'earned_amount': amount,
+                'earned_date': new Date()
+            });
+
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
