@@ -7,7 +7,7 @@ export const visitorIncreaseOrDecrease = functions.https.onCall(async (data, con
     const userId = context?.auth?.uid;
     const grocery_storeId = data['grocery_storeId'];
 
-    const addOrDelete = data['addOrDelete']; // 'add' or 'delete' string only
+    const addOrMinus = data['addOrMinus']; // 'add' or 'minus' string only
     const value = data['value'];
 
     //Guard against empty value
@@ -21,9 +21,9 @@ export const visitorIncreaseOrDecrease = functions.https.onCall(async (data, con
             status: 'Unable to read grocery store id'
         };
     }
-    if(!addOrDelete || addOrDelete != 'add' || addOrDelete != 'delete'){
+    if(!addOrMinus || addOrMinus != 'add' || addOrMinus != 'minus'){
         return {
-            status: 'operator must be \'add\' or \'delete\''
+            status: 'operator must be \'add\' or \'minus\''
         };
     }
     if(!value){
@@ -39,7 +39,7 @@ export const visitorIncreaseOrDecrease = functions.https.onCall(async (data, con
 
             const visitorCount = await getVisitorCount(grocery_storeId);
 
-            if(addOrDelete == 'add')await changeVisitorCount(grocery_storeId, visitorCount + value)
+            if(addOrMinus == 'add')await changeVisitorCount(grocery_storeId, visitorCount + value)
             else await changeVisitorCount(grocery_storeId, visitorCount - value)
 
             return {

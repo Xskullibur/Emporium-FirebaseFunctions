@@ -15,7 +15,6 @@ export async function changeVisitorCount(grocery_storeId: string, value: number)
 }
 
 export async function getVisitorCount(grocery_storeId: string): Promise<number>{
-    //Change the visitor count
     const groceryRef = await getGroceryStoreRef(grocery_storeId);
 
     const groceryData = (await groceryRef.get()).data();
