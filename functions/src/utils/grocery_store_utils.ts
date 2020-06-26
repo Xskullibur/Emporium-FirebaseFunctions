@@ -9,7 +9,7 @@ export async function changeVisitorCount(grocery_storeId: string, value: number)
     //Change the visitor count
     const groceryRef = await getGroceryStoreRef(grocery_storeId);
     await groceryRef.update({
-        visitor: value
+        current_visitor_count: value
     });
     return true;
 }
@@ -21,7 +21,21 @@ export async function getVisitorCount(grocery_storeId: string): Promise<number>{
 
     if(groceryData) {
         let visitorCount = 0;
-        if (groceryData['visitor_count']){visitorCount = groceryData['visitor_count']}
+        if (groceryData['current_visitor_count']){visitorCount = groceryData['current_visitor_count']}
+        return visitorCount;
+    }else{
+        return 0;
+    }
+}
+
+export async function getMaxVisitorCapacity(grocery_storeId: string): Promise<number>{
+    const groceryRef = await getGroceryStoreRef(grocery_storeId);
+
+    const groceryData = (await groceryRef.get()).data();
+
+    if(groceryData) {
+        let visitorCount = 0;
+        if (groceryData['max_visitor_capacity']){visitorCount = groceryData['max_visitor_capacity']}
         return visitorCount;
     }else{
         return 0;

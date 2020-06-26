@@ -1,14 +1,13 @@
 import * as functions from "firebase-functions";
 import {getUserType, UserType} from "../utils/user_utils";
-import {changeVisitorCount, getVisitorCount} from "../utils/grocery_store_utils";
+import {changeVisitorCount, getMaxVisitorCapacity, getVisitorCount} from "../utils/grocery_store_utils";
 
 export const visitorIncreaseOrDecrease = functions.https.onCall(async (data, context) => {
 
     const userId = context?.auth?.uid;
     const grocery_storeId = data['grocery_storeId'];
 
-    const addOrMinus = data['addOrMinus']; // 'add' or 'minus' string only
-    const value = data['value'];
+    const value = data['value'] as number;
 
     //Guard against empty value
     if(!userId){
@@ -19,11 +18,6 @@ export const visitorIncreaseOrDecrease = functions.https.onCall(async (data, con
     if(!grocery_storeId){
         return {
             status: 'Unable to read grocery store id'
-        };
-    }
-    if(!addOrMinus || addOrMinus != 'add' || addOrMinus != 'minus'){
-        return {
-            status: 'operator must be \'add\' or \'minus\''
         };
     }
     if(!value){
@@ -38,13 +32,21 @@ export const visitorIncreaseOrDecrease = functions.https.onCall(async (data, con
         case UserType.Merchant:
 
             const visitorCount = await getVisitorCount(grocery_storeId);
+            const maxVisitorCapacity = await getMaxVisitorCapacity(grocery_storeId);
 
-            if(addOrMinus == 'add')await changeVisitorCount(grocery_storeId, visitorCount + value)
-            else await changeVisitorCount(grocery_storeId, visitorCount - value)
+            const updatedVisitorCount = visitorCount + value;
 
-            return {
-                status: 'Success'
+            if (updatedVisitorCount > 0 && updatedVisitorCount <= maxVisitorCapacity){
+                await changeVisitorCount(grocery_storeId, updatedVisitorCount)
+                return {
+                    status: 'Success'
+                }
+            }else{
+                return {
+                    status: 'Over capacity or less than 0'
+                }
             }
+
         case UserType.User:
             return {
                 status: 'Not allowed to modify visitor count unless user is a merchant'
