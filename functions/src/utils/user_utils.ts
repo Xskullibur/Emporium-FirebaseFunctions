@@ -12,7 +12,7 @@ export async function getUserType(userId: string): Promise<UserType>  {
     const userData = user.data();
 
     if(user.exists) {
-        if (userData && userData['type'] == 'merchant'){
+        if (userData && userData['type'] === 'merchant'){
             return UserType.Merchant;
         }else{
             return UserType.User;

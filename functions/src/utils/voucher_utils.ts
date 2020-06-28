@@ -8,8 +8,8 @@ export async function deletePoints(userId: string, cost: number): Promise<boolea
     if(user.exists){
         //Delete points
         if(userData){
-            let point = userData['points'];
-            let newPoint = point - cost;
+            const point = userData['points'];
+            const newPoint = point - cost;
             if(newPoint >= 0){
                 //Enough points
 
@@ -39,8 +39,8 @@ export async function addPoints(userId: string, amount: number): Promise<boolean
     if(user.exists){
         //Delete points
         if(userData){
-            let point = userData['points'];
-            let newPoint = point + amount;
+            const point = userData['points'];
+            const newPoint = point + amount;
             //Update the points
             await userRef.set({
                 'points': newPoint

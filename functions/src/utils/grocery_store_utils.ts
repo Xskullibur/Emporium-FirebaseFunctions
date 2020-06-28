@@ -1,7 +1,7 @@
-import firestore from "firebase-admin";
 import * as admin from "firebase-admin";
 
-export async function getGroceryStoreRef(groceryStoreId: string): Promise<firestore.firestore.DocumentReference>{
+
+export async function getGroceryStoreRef(groceryStoreId: string): Promise<admin.firestore.DocumentReference>{
     return admin.firestore().doc(`emporium/globals/grocery_stores/${groceryStoreId}`);
 }
 
