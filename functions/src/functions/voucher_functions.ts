@@ -88,10 +88,10 @@ export const seenEarnedReward  = functions.https.onCall(async (data, context) =>
 //TESTING ONLY
 export const testAddPoints = functions.https.onCall(async (data, context) => {
     const userId = context?.auth?.uid;
-
+    console.log(userId);
     if(userId){
         const result = await addPoints(userId, 100);
-
+        console.log(result);
         if(result){
             return {
                 status: 'Success'
@@ -99,6 +99,7 @@ export const testAddPoints = functions.https.onCall(async (data, context) => {
         }
     }
 
+    
     return {
         status: 'Failed'
     }

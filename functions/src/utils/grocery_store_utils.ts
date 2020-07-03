@@ -7,6 +7,7 @@ export async function getGroceryStoreRef(groceryStoreId: string): Promise<admin.
 
 export async function changeVisitorCount(grocery_storeId: string, value: number): Promise<boolean>{
     //Change the visitor count
+    console.log(value);
     const groceryRef = await getGroceryStoreRef(grocery_storeId);
     await groceryRef.update({
         current_visitor_count: value

@@ -5,26 +5,23 @@ export async function deletePoints(userId: string, cost: number): Promise<boolea
     const user = await userRef.get();
     const userData = user.data();
 
-    if(user.exists){
-        //Delete points
-        if(userData){
-            const point = userData['points'];
-            const newPoint = point - cost;
-            if(newPoint >= 0){
-                //Enough points
+    //Delete points
+    if(user.exists && userData){
+        const point = userData['points'];
+        const newPoint = point - cost;
+        if(newPoint >= 0){
+            //Enough points
 
-                //Update the points
-                await userRef.update({
-                    'points': newPoint
-                });
+            //Update the points
+            await userRef.update({
+                'points': newPoint
+            });
 
-                return true;
-            }else{
-                //Not enough points
-                return false;
-            }
+            return true;
+        }else{
+            //Not enough points
+            return false;
         }
-        return false;
     }
     return false;
 
@@ -36,6 +33,7 @@ export async function addPoints(userId: string, amount: number): Promise<boolean
     const user = await userRef.get();
     const userData = user.data();
 
+    console.log(userData);
     if(user.exists){
         //Delete points
         if(userData){
