@@ -16,3 +16,4 @@ if(serviceAccount){
 //Firebase functions
 export * from './functions/grocery_store_functions';
 export * from './functions/voucher_functions';
+export * from './functions/users_functions';
