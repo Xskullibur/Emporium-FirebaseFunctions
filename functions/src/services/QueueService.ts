@@ -1,5 +1,6 @@
 class QueueService {
 
+    storeDict: { [id: string]: QueueItem[]} = {}
     queue: QueueItem[] = []
 
     constructor() {
@@ -11,7 +12,7 @@ class QueueService {
     }
 
     joinQueue(item: QueueItem) {
-        this.queue.push(item)
+        this.storeDict[item.storeId].push(item)
     }
  
 }

@@ -1,11 +1,43 @@
-import { QueueStatus } from './../utils/queue_utils';
 import * as functions from "firebase-functions";
-import { updateQueue } from "../utils/queue_utils";
+
+import { QueueStatus, updateQueue } from './../utils/queue_utils';
+
+exports.storeListiner = functions.https.onCall(async (data, context) => {
+
+    // Get Values
+    const userId = context?.auth?.uid
+    const storeId: string = data.storeId
+    
+    //Guard against empty value
+    if(!userId){
+        return {
+            status: 'Unable to read user id'
+        };
+    }
+    if(!storeId){
+        return {
+            status: 'Unable to read store id'
+        };
+    }
+
+    functions.database.ref(`/emporium/globals/grocery_stores/${storeId}`)
+        .onUpdate((snapshot, context) => {
+
+            const data = snapshot.after.val()
+            const current_visitor_count = data['current_visitor_count']
+            const max_visitor_capacity = data['max_visitor_capacity']
+
+            if (current_visitor_count < max_visitor_capacity) {
+                
+            }
+
+    })
+})
 
 exports.joinQueue = functions.https.onCall(async (data, context) => {
 
     // Get Values
-    const userId = context?.auth?.uid;
+    const userId = context?.auth?.uid
     const queueId: string = data.queueId
     const storeId: string = data.storeId
     
