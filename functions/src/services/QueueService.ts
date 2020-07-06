@@ -15,4 +15,8 @@ class QueueService {
         this.storeDict[item.storeId].push(item)
     }
  
+    popQueue(storeId: string) {
+        return this.storeDict[storeId].pop()
+    }
+
 }
