@@ -7,8 +7,8 @@ class QueueService {
         
     }
 
-    getQueue() {
-        return this.queue
+    getQueue(storeId: string) {
+        return this.storeDict[storeId]
     }
 
     joinQueue(item: QueueItem) {

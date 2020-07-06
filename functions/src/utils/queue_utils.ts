@@ -6,19 +6,21 @@ export enum QueueStatus {
     Completed = "Completed"
 }
 
-export async function updateQueue(status: QueueStatus, storeId: String, userId: String): Promise<string> {
+export async function updateQueue(status: QueueStatus, storeId: String, userId: String): Promise<{}> {
 
     const storeRef = admin.firestore().doc(`emporium/globals/grocery_stores/${storeId}`)
-    const queueCollection = admin.firestore().collection(`users/${userId}/queue`);
+    const queueCollection = storeRef.collection('queue')
 
     let newQueue = queueCollection.doc()
     return await newQueue.update({
         'status': status,
-        'store': storeRef
+        'userId': userId
     }).then(() => {
-        return 'Successfully joined queue'
+        return {
+            queueId: newQueue.id
+        }
     }).catch((error) => {
-        return `Error writing document (JoinQueue) ${error}`
+        return error
     })
 
 }
