@@ -1,6 +1,6 @@
 class QueueItem {
 
-    queueId: string
+    id: string
     userId: string
     storeId: string
     joinDateTime?: Date
@@ -13,7 +13,7 @@ class QueueItem {
      * @param _storeID 
      */
     constructor(_queueID: string, _userID: string, _storeID: string) {
-        this.queueId = _queueID
+        this.id = _queueID
         this.userId = _userID
         this.storeId = _storeID
     }

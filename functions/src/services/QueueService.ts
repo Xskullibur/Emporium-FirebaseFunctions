@@ -1,10 +1,18 @@
-class QueueService {
+export class QueueService {
 
     storeDict: { [id: string]: QueueItem[]} = {}
     queue: QueueItem[] = []
 
     constructor() {
         
+    }
+
+    queueLength(storeId: string) {
+        return this.storeDict[storeId].length
+    }
+
+    clearQueue() {
+        this.storeDict = {}
     }
 
     getQueue(storeId: string) {
