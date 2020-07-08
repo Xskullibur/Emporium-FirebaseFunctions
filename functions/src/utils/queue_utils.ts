@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import * as functions from "firebase-functions";
 
 export enum QueueStatus {
     InQueue = "In Queue",
@@ -12,15 +13,18 @@ export async function updateQueue(status: QueueStatus, storeId: String, userId: 
     const queueCollection = storeRef.collection('queue')
 
     let newQueue = queueCollection.doc()
-    return await newQueue.update({
+    let queueId = await newQueue.set({
         'status': status,
         'userId': userId
+    }, {
+        merge: true
     }).then(() => {
-        return {
-            queueId: newQueue.id
-        }
+        return newQueue.id
     }).catch((error) => {
-        return error
+        throw new functions.https.HttpsError("aborted" , `Error while updating queue. ${error}`)
     })
 
+    return {
+        "queueId": queueId
+    }
 }
