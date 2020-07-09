@@ -1,30 +1,36 @@
+import * as functions from "firebase-functions";
+import { getQueue, QueueStatus } from '../utils/queue_utils';
 export class QueueService {
-
-    storeDict: { [id: string]: QueueItem[]} = {}
-    queue: QueueItem[] = []
 
     constructor() {
         
     }
 
-    queueLength(storeId: string) {
-        return this.storeDict[storeId].length
-    }
+    async queueLength(storeId: string) {
+        let queueList = await getQueue(storeId)
+        queueList = queueList.filter(x => x.status === QueueStatus.InQueue.valueOf())
 
-    clearQueue() {
-        this.storeDict = {}
-    }
-
-    getQueue(storeId: string) {
-        return this.storeDict[storeId]
-    }
-
-    joinQueue(item: QueueItem) {
-        this.storeDict[item.storeId].push(item)
+        return queueList.length
     }
  
-    popQueue(storeId: string) {
-        return this.storeDict[storeId].pop()
+    async popQueue(storeId: string) {
+
+        let queueList = await getQueue(storeId)
+        queueList = queueList.filter(x => x.status === QueueStatus.InQueue.valueOf())
+
+        let currentQueue = queueList.pop()
+        let updatedQueueLength = `${queueList.length}`
+
+        if (currentQueue !== undefined){
+            return {
+                'currentQueueId': currentQueue.id,
+                'queueLength': updatedQueueLength
+            }
+        }
+        else {
+            throw new functions.https.HttpsError("not-found" , "Could not find queue")
+        }
+
     }
 
 }

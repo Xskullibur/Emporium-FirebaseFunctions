@@ -1,10 +1,11 @@
-class QueueItem {
+import { QueueStatus } from "../utils/queue_utils"
+
+export class QueueItem {
 
     id: string
     userId: string
-    storeId: string
-    joinDateTime?: Date
-    leaveDateTime?: Date
+    date: Date
+    status: QueueStatus
 
     /**
      * 
@@ -12,10 +13,11 @@ class QueueItem {
      * @param _userID 
      * @param _storeID 
      */
-    constructor(_queueID: string, _userID: string, _storeID: string) {
+    constructor(_queueID: string, _userID: string, _date: Date, _status: QueueStatus) {
         this.id = _queueID
         this.userId = _userID
-        this.storeId = _storeID
+        this.date = _date
+        this.status = _status
     }
 
 }

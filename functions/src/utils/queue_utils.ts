@@ -1,3 +1,4 @@
+import { QueueItem } from './../models/QueueItem';
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 
@@ -7,6 +8,31 @@ export enum QueueStatus {
     Completed = "Completed"
 }
 
+export async function getQueue(storeId: string): Promise<QueueItem[]> {
+    const queueCollection = admin.firestore().collection(`emporium/globals/grocery_stores/${storeId}/queue/`)
+    let documents = await queueCollection.get()
+
+    if (documents.empty) {
+        throw new functions.https.HttpsError("not-found" , "Queue empty")
+    }
+    else {
+
+        let queueList: QueueItem[] = []
+
+        documents.forEach(doc => {
+            let data = doc.data()
+
+            if (data !== undefined) {
+                let queue = new QueueItem(doc.id, data['userId'], data['date'].toDate(), data['status'])
+                queueList.push(queue)    
+            }
+        })
+
+        queueList.sort((x, y) => x.date.getTime() - y.date.getTime())
+        return queueList
+    }
+}
+
 export async function getCurrentlyServing(storeId: string): Promise<String> {
     const storeRef = admin.firestore().doc(`emporium/globals/grocery_stores/${storeId}`)
     let document = await storeRef.get()
@@ -14,10 +40,17 @@ export async function getCurrentlyServing(storeId: string): Promise<String> {
     if (document.exists) {
         let data = document.data()
         if (data !== undefined){
-            return data["currently_serving"]
+
+            if (data["currently_serving"] !== undefined) {
+                return data["currently_serving"]
+            }
+            else {
+                return "-"
+            }
+
         }
         else {
-            return "-"
+            throw new functions.https.HttpsError("not-found" , "Could not find document data")
         }
     }
     else {
@@ -26,17 +59,13 @@ export async function getCurrentlyServing(storeId: string): Promise<String> {
 
 }
 
-export async function updateCurrentlyServing(storeId: string, queueId: string): Promise<Boolean> {
+export async function updateCurrentlyServing(storeId: string, queueId: string) {
     
     const storeRef = admin.firestore().doc(`emporium/globals/grocery_stores/${storeId}`)
-    return storeRef.set({
+    storeRef.set({
         'currently_serving': queueId
-    }, {merge: true})
-    .then(() => {
-        return true
-    })
-    .catch((error) => {
-        return false
+    }).catch((error) => {
+        console.error(`Error Updating Currently Serving ${error}`)
     })
 
 }
@@ -47,8 +76,9 @@ export async function addQueue(storeId: String, userId: String): Promise<string>
 
     let newQueue = queueCollection.doc()
     let queueId = await newQueue.set({
-        'status': QueueStatus.InStore,
-        'userId': userId
+        'userId': userId,
+        'date': new Date(),
+        'status': QueueStatus.InQueue
     }).then(() => {
         return newQueue.id
     }).catch((error) => {
@@ -58,15 +88,15 @@ export async function addQueue(storeId: String, userId: String): Promise<string>
     return queueId
 }
 
-export async function updateQueue(storeId: string, queueId: string, status: QueueStatus): Promise<Boolean> {
+export async function updateQueue(storeId: string, queueId: string, status: QueueStatus) {
     
     const queue = admin.firestore().doc(`emporium/globals/grocery_stores/${storeId}/queue/${queueId}`)
-    return await queue.update({
+    return await queue.set({
         "status": status
-    }).then(() => {
-        return true
+    }, {
+        merge: true
     }).catch((error) => {
-        return false
+        console.error(`Error Updating Queue ${error}`)
     })
 
 }
