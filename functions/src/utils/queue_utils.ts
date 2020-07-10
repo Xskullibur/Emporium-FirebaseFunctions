@@ -64,7 +64,7 @@ export async function updateCurrentlyServing(storeId: string, queueId: string) {
     const storeRef = admin.firestore().doc(`emporium/globals/grocery_stores/${storeId}`)
     storeRef.set({
         'currently_serving': queueId
-    }).catch((error) => {
+    }, { merge: true }).catch((error) => {
         console.error(`Error Updating Currently Serving ${error}`)
     })
 
@@ -79,7 +79,7 @@ export async function addQueue(storeId: String, userId: String): Promise<string>
         'userId': userId,
         'date': new Date(),
         'status': QueueStatus.InQueue
-    }).then(() => {
+    }, { merge: true }).then(() => {
         return newQueue.id
     }).catch((error) => {
         throw new functions.https.HttpsError("aborted" , `Error while updating queue. ${error}`)

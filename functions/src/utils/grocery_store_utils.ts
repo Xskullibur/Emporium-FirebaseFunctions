@@ -8,9 +8,9 @@ export async function getGroceryStoreRef(groceryStoreId: string): Promise<admin.
 export async function changeVisitorCount(grocery_storeId: string, value: number): Promise<boolean>{
     //Change the visitor count
     const groceryRef = await getGroceryStoreRef(grocery_storeId);
-    await groceryRef.update({
+    await groceryRef.set({
         current_visitor_count: value
-    });
+    }, { merge: true });
     return true;
 }
 

@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 
 import { addQueue, updateQueue, updateCurrentlyServing, QueueStatus, getCurrentlyServing } from './../utils/queue_utils';
 import { Global } from './global';
+import { getVisitorCount, changeVisitorCount } from "../utils/grocery_store_utils";
 
 declare var global: Global
 var queueService = global.queueService
@@ -37,13 +38,24 @@ exports.popQueue = functions.https.onCall(async (data, context) => {
     if(!storeId){
         throw new functions.https.HttpsError("not-found" , "Could not find StoreID")
     }
-
-    
-    updateQueue(storeId, queueId, QueueStatus.InStore)
-    updateCurrentlyServing(storeId, queueId)
     
     // Pop from server queue
-    return await queueService.popQueue(storeId)
+    let currentQueueId = await queueService.popQueue(storeId)
+    
+    // Update Visitor Counter
+    let visitor_count = await getVisitorCount(storeId)
+    let success = await changeVisitorCount(storeId, visitor_count +1)
+
+    if (!success) {
+        throw new functions.https.HttpsError("aborted" , "Update Visitor Count Failed")
+    }
+    
+    // Update FireStore
+    await updateQueue(storeId, queueId, QueueStatus.InStore)
+    await updateCurrentlyServing(storeId, queueId)
+    
+    // Return
+    return currentQueueId
 
 })
 
