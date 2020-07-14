@@ -1,12 +1,7 @@
 import { QueueItem } from './../models/QueueItem';
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-
-export enum QueueStatus {
-    InQueue = "In Queue",
-    InStore = "In Store",
-    Completed = "Completed"
-}
+import { QueueStatus } from './utils';
 
 export async function getQueue(storeId: string): Promise<QueueItem[]> {
     const queueCollection = admin.firestore().collection(`emporium/globals/grocery_stores/${storeId}/queue/`)
@@ -28,7 +23,7 @@ export async function getQueue(storeId: string): Promise<QueueItem[]> {
             }
         })
 
-        queueList.sort((x, y) => x.date.getTime() - y.date.getTime())
+        queueList.sort((x, y) => y.date.getTime() - x.date.getTime())
         return queueList
     }
 }

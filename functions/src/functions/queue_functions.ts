@@ -1,8 +1,9 @@
 import * as functions from "firebase-functions";
 
-import { addQueue, updateQueue, updateCurrentlyServing, QueueStatus, getCurrentlyServing } from './../utils/queue_utils';
+import { addQueue, updateQueue, updateCurrentlyServing, getCurrentlyServing } from './../utils/queue_utils';
 import { Global } from './global';
 import { getVisitorCount, changeVisitorCount } from "../utils/grocery_store_utils";
+import { QueueStatus } from "../utils/utils";
 
 declare var global: Global
 var queueService = global.queueService
@@ -25,6 +26,35 @@ exports.queueInfo = functions.https.onCall(async (data, context) => {
 
 })
 
+/**
+ * Create a Queue with status InQueue
+ */
+exports.joinQueue = functions.https.onCall(async (data, context) => {
+
+    // Get Values
+    const userId = context?.auth?.uid
+    const storeId: string = data.storeId
+
+    //Guard against empty value
+    if(!userId){
+        throw new functions.https.HttpsError("not-found" , "Could not find UserID")
+    }
+    if(!storeId){
+        throw new functions.https.HttpsError("not-found" , "Could not find StoreID")
+    }
+
+    // Update FireStore
+    let userQueueId = await addQueue(storeId, userId)
+
+    return {
+        "queueId": userQueueId,
+    }
+
+})
+
+/**
+ * Dequeue first element and update status to OnTheWay
+ */
 exports.popQueue = functions.https.onCall(async (data, context) => {
 
     // Get Values
@@ -51,7 +81,7 @@ exports.popQueue = functions.https.onCall(async (data, context) => {
     }
     
     // Update FireStore
-    await updateQueue(storeId, queueId, QueueStatus.InStore)
+    await updateQueue(storeId, queueId, QueueStatus.OnTheWay)
     await updateCurrentlyServing(storeId, queueId)
     
     // Return
@@ -59,26 +89,36 @@ exports.popQueue = functions.https.onCall(async (data, context) => {
 
 })
 
-
-exports.joinQueue = functions.https.onCall(async (data, context) => {
+exports.updateStatus = functions.https.onCall(async (data, context) => {
 
     // Get Values
-    const userId = context?.auth?.uid
-    const storeId: string = data.storeId
-
-    //Guard against empty value
-    if(!userId){
-        throw new functions.https.HttpsError("not-found" , "Could not find UserID")
+    const queueId: string = data["queueId"]
+    const storeId: string = data["storeId"]
+    const status: string = data['status']
+    
+    // Guard against empty value
+    if(!queueId){
+        throw new functions.https.HttpsError("not-found" , "Could not find QueueID")
     }
     if(!storeId){
         throw new functions.https.HttpsError("not-found" , "Could not find StoreID")
     }
-
-    // Update FireStore
-    let userQueueId = await addQueue(storeId, userId)
-
-    return {
-        "queueId": userQueueId,
+    if (!status) {
+        throw new functions.https.HttpsError("not-found" , "Could not find Status")
     }
+
+    // Check status
+    if (status == QueueStatus.OnTheWay) {
+        await updateQueue(storeId, queueId, QueueStatus.OnTheWay)
+    }
+    else if (status == QueueStatus.Completed) {
+        await updateQueue(storeId, queueId, QueueStatus.Completed)
+    }
+    else {
+        throw new functions.https.HttpsError("not-found" , "Invalid Status")
+    }
+
+    // Return completed
+    return true
 
 })

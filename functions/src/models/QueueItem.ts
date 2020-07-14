@@ -1,4 +1,4 @@
-import { QueueStatus } from "../utils/queue_utils"
+import { QueueStatus } from "../utils/utils"
 
 export class QueueItem {
 

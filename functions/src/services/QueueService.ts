@@ -1,5 +1,7 @@
 import * as functions from "firebase-functions";
-import { getQueue, QueueStatus } from '../utils/queue_utils';
+
+import { QueueStatus } from "../utils/utils";
+import { getQueue } from '../utils/queue_utils';
 export class QueueService {
 
     constructor() {
@@ -17,6 +19,7 @@ export class QueueService {
 
         let queueList = await getQueue(storeId)
         queueList = queueList.filter(x => x.status === QueueStatus.InQueue.valueOf())
+        queueList = queueList.sort((x, y) => y.date.getTime() - x.date.getTime())
 
         let currentQueue = queueList.pop()
         let updatedQueueLength = `${queueList.length}`
