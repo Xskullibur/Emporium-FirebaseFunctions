@@ -69,7 +69,18 @@ export async function addQueue(storeId: String, userId: String): Promise<string>
     const storeRef = admin.firestore().doc(`emporium/globals/grocery_stores/${storeId}`)
     const queueCollection = storeRef.collection('queue')
 
+    // Generate QueueId
     let newQueue = queueCollection.doc()
+
+    // Add Queue Ref to User
+    const userRef = admin.firestore().doc(`users/${userId}/`)
+    await userRef.set({
+        'queue': newQueue
+    }, { merge: true }).catch((error) => {
+        throw new functions.https.HttpsError("aborted" , `Error while adding queue reference ${error}`)
+    })
+
+    // Add Queue
     let queueId = await newQueue.set({
         'userId': userId,
         'date': new Date(),
