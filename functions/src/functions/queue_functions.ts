@@ -5,8 +5,8 @@ import { Global } from './global';
 import { getVisitorCount, changeVisitorCount } from "../utils/grocery_store_utils";
 import { QueueStatus } from "../utils/utils";
 
-declare var global: Global
-var queueService = global.queueService
+declare const global: Global
+const queueService = global.queueService
 
 exports.queueInfo = functions.https.onCall(async (data, context) => {
 
@@ -14,10 +14,10 @@ exports.queueInfo = functions.https.onCall(async (data, context) => {
     const storeId: string = data["storeId"]
 
     // Queue Length
-    let queueLength = await queueService.queueLength(storeId)
+    const queueLength = await queueService.queueLength(storeId)
 
     // Currently Serving
-    let currentlyServing = await getCurrentlyServing(storeId)
+    const currentlyServing = await getCurrentlyServing(storeId)
 
     return {
         "queueLength": `${queueLength}`,
@@ -44,7 +44,7 @@ exports.joinQueue = functions.https.onCall(async (data, context) => {
     }
 
     // Update FireStore
-    let userQueueId = await addQueue(storeId, userId)
+    const userQueueId = await addQueue(storeId, userId)
 
     return {
         "queueId": userQueueId,
@@ -73,8 +73,8 @@ exports.popQueue = functions.https.onCall(async (data, context) => {
     let currentQueueId = await queueService.popQueue(storeId)
     
     // Update Visitor Counter
-    let visitor_count = await getVisitorCount(storeId)
-    let success = await changeVisitorCount(storeId, visitor_count +1)
+    const visitor_count = await getVisitorCount(storeId)
+    const success = await changeVisitorCount(storeId, visitor_count +1)
 
     if (!success) {
         throw new functions.https.HttpsError("aborted" , "Update Visitor Count Failed")
@@ -108,10 +108,10 @@ exports.updateStatus = functions.https.onCall(async (data, context) => {
     }
 
     // Check status
-    if (status == QueueStatus.OnTheWay) {
+    if (status === QueueStatus.OnTheWay) {
         await updateQueue(storeId, queueId, QueueStatus.OnTheWay)
     }
-    else if (status == QueueStatus.Completed) {
+    else if (status === QueueStatus.Completed) {
         await updateQueue(storeId, queueId, QueueStatus.Completed)
     }
     else {

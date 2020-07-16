@@ -5,17 +5,17 @@ import { QueueStatus } from './utils';
 
 export async function getQueue(storeId: string): Promise<QueueItem[]> {
     const queueCollection = admin.firestore().collection(`emporium/globals/grocery_stores/${storeId}/queue/`)
-    let documents = await queueCollection.get()
+    const documents = await queueCollection.get()
 
     if (documents.empty) {
         throw new functions.https.HttpsError("not-found" , "Queue empty")
     }
     else {
 
-        let queueList: QueueItem[] = []
+        const queueList: QueueItem[] = []
 
         documents.forEach(doc => {
-            let data = doc.data()
+            const data = doc.data()
 
             if (data !== undefined) {
                 let queue = new QueueItem(doc.id, data['userId'], data['date'].toDate(), data['status'])
@@ -70,7 +70,7 @@ export async function addQueue(storeId: String, userId: String): Promise<string>
     const queueCollection = storeRef.collection('queue')
 
     // Generate QueueId
-    let newQueue = queueCollection.doc()
+    const newQueue = queueCollection.doc()
 
     // Add Queue Ref to User
     const userRef = admin.firestore().doc(`users/${userId}/`)
@@ -81,7 +81,7 @@ export async function addQueue(storeId: String, userId: String): Promise<string>
     })
 
     // Add Queue
-    let queueId = await newQueue.set({
+    const queueId = await newQueue.set({
         'userId': userId,
         'date': new Date(),
         'status': QueueStatus.InQueue

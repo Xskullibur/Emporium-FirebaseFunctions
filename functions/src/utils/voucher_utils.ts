@@ -14,8 +14,10 @@ export async function deletePoints(userId: string, cost: number): Promise<boolea
                 //Enough points
 
                 //Update the points
-                await userRef.update({
+                await userRef.set({
                     'points': newPoint
+                }, {
+                    merge: true
                 });
 
                 return true;
