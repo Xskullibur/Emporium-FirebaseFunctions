@@ -8,6 +8,9 @@ import { QueueStatus } from "../utils/utils";
 declare const global: Global
 const queueService = global.queueService
 
+/**
+ * Returns Queue Length and Currently Serving
+ */
 exports.queueInfo = functions.https.onCall(async (data, context) => {
 
     // Get Values
@@ -52,25 +55,39 @@ exports.joinQueue = functions.https.onCall(async (data, context) => {
 
 })
 
+
+exports.queueListener = functions.firestore.document('emporium/globals/grocery_stores/{storeId}')
+    .onUpdate((change, context) => {
+
+        const newVal = change.after.data()
+        const current_visitor_count: number = newVal.current_visitor_count
+        const max_visitor_capacity: number = newVal.max_visitor_capacity
+
+        // Check for space in store
+        if (current_visitor_count < max_visitor_capacity) {
+
+            // Pop Queue
+            
+
+        }
+
+})
+
 /**
  * Dequeue first element and update status to OnTheWay
  */
 exports.popQueue = functions.https.onCall(async (data, context) => {
 
     // Get Values
-    const queueId: string = data["queueId"]
     const storeId: string = data["storeId"]
         
     //Guard against empty value
-    if(!queueId){
-        throw new functions.https.HttpsError("not-found" , "Could not find QueueID")
-    }
     if(!storeId){
         throw new functions.https.HttpsError("not-found" , "Could not find StoreID")
     }
     
     // Pop from server queue
-    let currentQueueId = await queueService.popQueue(storeId)
+    let newQueueStatus = await queueService.popQueue(storeId)
     
     // Update Visitor Counter
     const visitor_count = await getVisitorCount(storeId)
@@ -81,14 +98,17 @@ exports.popQueue = functions.https.onCall(async (data, context) => {
     }
     
     // Update FireStore
-    await updateQueue(storeId, queueId, QueueStatus.OnTheWay)
-    await updateCurrentlyServing(storeId, queueId)
+    await updateQueue(storeId, newQueueStatus.currentQueueId, QueueStatus.OnTheWay)
+    await updateCurrentlyServing(storeId, newQueueStatus.currentQueueId)
     
     // Return
-    return currentQueueId
+    return newQueueStatus
 
 })
 
+/**
+ * Update queue status
+ */
 exports.updateStatus = functions.https.onCall(async (data, context) => {
 
     // Get Values
