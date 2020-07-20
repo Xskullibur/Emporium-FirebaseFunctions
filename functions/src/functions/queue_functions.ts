@@ -55,24 +55,6 @@ exports.joinQueue = functions.https.onCall(async (data, context) => {
 
 })
 
-
-exports.queueListener = functions.firestore.document('emporium/globals/grocery_stores/{storeId}')
-    .onUpdate((change, context) => {
-
-        const newVal = change.after.data()
-        const current_visitor_count: number = newVal.current_visitor_count
-        const max_visitor_capacity: number = newVal.max_visitor_capacity
-
-        // Check for space in store
-        if (current_visitor_count < max_visitor_capacity) {
-
-            // Pop Queue
-            
-
-        }
-
-})
-
 /**
  * Dequeue first element and update status to OnTheWay
  */
