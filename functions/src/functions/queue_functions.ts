@@ -68,13 +68,13 @@ exports.popQueue = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError("not-found" , "Could not find StoreID")
     }
     
-    // Pop from server queue
-    let newQueueStatus = await queueService.popQueue(storeId)
-    
     // Update Visitor Counter
     const visitor_count = await getVisitorCount(storeId)
     const success = await changeVisitorCount(storeId, visitor_count +1)
-
+    
+    // Pop from server queue
+    let newQueueStatus = await queueService.popQueue(storeId)
+    
     if (!success) {
         throw new functions.https.HttpsError("aborted" , "Update Visitor Count Failed")
     }
