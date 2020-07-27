@@ -14,6 +14,20 @@ export async function changeVisitorCount(grocery_storeId: string, value: number)
     return true;
 }
 
+export async function updateStoreQueue(storeId: string, new_visitor_count: number, queueId: string): Promise<Boolean> {
+    
+    const storeRef = await getGroceryStoreRef(storeId)
+    await storeRef.set({
+        'current_visitor_count': new_visitor_count,
+        'currently_serving': queueId
+    }, { merge: true }).catch(error => {
+        console.error(error);
+        return false
+    })
+    return true
+
+}
+
 export async function getVisitorCount(grocery_storeId: string): Promise<number>{
     const groceryRef = await getGroceryStoreRef(grocery_storeId);
 

@@ -1,8 +1,8 @@
 import * as functions from "firebase-functions";
 
-import { addQueue, updateQueue, updateCurrentlyServing, getCurrentlyServing } from './../utils/queue_utils';
+import { addQueue, updateQueue, getCurrentlyServing } from './../utils/queue_utils';
 import { Global } from './global';
-import { getVisitorCount, changeVisitorCount } from "../utils/grocery_store_utils";
+import { getVisitorCount, updateStoreQueue } from "../utils/grocery_store_utils";
 import { QueueStatus } from "../utils/utils";
 
 declare const global: Global
@@ -68,20 +68,17 @@ exports.popQueue = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError("not-found" , "Could not find StoreID")
     }
     
-    // Update Visitor Counter
-    const visitor_count = await getVisitorCount(storeId)
-    const success = await changeVisitorCount(storeId, visitor_count +1)
-    
     // Pop from server queue
     let newQueueStatus = await queueService.popQueue(storeId)
     
-    if (!success) {
-        throw new functions.https.HttpsError("aborted" , "Update Visitor Count Failed")
-    }
-    
+    // Update Store Queue
+    const visitor_count = await getVisitorCount(storeId)
+    await updateStoreQueue(storeId, visitor_count, newQueueStatus.currentQueueId).catch(error => {
+        throw new functions.https.HttpsError("aborted" , "Faild to update StoreQueue")
+    })
+
     // Update FireStore
     await updateQueue(storeId, newQueueStatus.currentQueueId, QueueStatus.OnTheWay)
-    await updateCurrentlyServing(storeId, newQueueStatus.currentQueueId)
     
     // Return
     return newQueueStatus
