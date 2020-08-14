@@ -26,7 +26,6 @@ export async function deletePoints(userId: string, cost: number): Promise<boolea
                 return false;
             }
         }
-        return false;
     }
     return false;
 
@@ -38,6 +37,7 @@ export async function addPoints(userId: string, amount: number): Promise<boolean
     const user = await userRef.get();
     const userData = user.data();
 
+    console.log(userData);
     if(user.exists){
         //Delete points
         if(userData){

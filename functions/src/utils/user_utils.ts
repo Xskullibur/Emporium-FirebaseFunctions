@@ -20,3 +20,18 @@ export async function getUserType(userId: string): Promise<UserType>  {
     }
     return UserType.User;
 }
+
+export async function createUser(userId: string): Promise<boolean> {
+    const userRef = admin.firestore().doc(`users/${userId}`);
+    const user = await userRef.get();
+
+    if(!user.exists) {
+        //Create user
+        await userRef.set({
+            type: 'user',
+            points: 0
+        });
+        return true;
+    }
+    return false;
+}
