@@ -8,10 +8,24 @@ export async function getGroceryStoreRef(groceryStoreId: string): Promise<admin.
 export async function changeVisitorCount(grocery_storeId: string, value: number): Promise<boolean>{
     //Change the visitor count
     const groceryRef = await getGroceryStoreRef(grocery_storeId);
-    await groceryRef.update({
+    await groceryRef.set({
         current_visitor_count: value
-    });
+    }, { merge: true });
     return true;
+}
+
+export async function updateStoreQueue(storeId: string, new_visitor_count: number, queueId: string): Promise<Boolean> {
+    
+    const storeRef = await getGroceryStoreRef(storeId)
+    await storeRef.set({
+        'current_visitor_count': new_visitor_count,
+        'currently_serving': queueId
+    }, { merge: true }).catch(error => {
+        console.error(error);
+        return false
+    })
+    return true
+
 }
 
 export async function getVisitorCount(grocery_storeId: string): Promise<number>{
