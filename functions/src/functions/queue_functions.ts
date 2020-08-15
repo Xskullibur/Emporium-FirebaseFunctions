@@ -73,7 +73,7 @@ exports.popQueue = functions.https.onCall(async (data, context) => {
     
     // Update Store Queue
     const visitor_count = await getVisitorCount(storeId)
-    await updateStoreQueue(storeId, visitor_count, newQueueStatus.currentQueueId).catch(error => {
+    await updateStoreQueue(storeId, visitor_count+1, newQueueStatus.currentQueueId).catch(error => {
         throw new functions.https.HttpsError("aborted" , "Faild to update StoreQueue")
     })
 
