@@ -37,7 +37,8 @@ export const claimVoucher = functions.https.onCall(async (data, context) => {
                         name: voucherData['name'],
                         description: voucherData['description'],
                         cost: voucherData['cost'],
-                        formula: voucherData['formula']
+                        formula: voucherData['formula'],
+                        used: false
                     });
                     return {
                         status: "Success"
@@ -61,7 +62,6 @@ export const claimVoucher = functions.https.onCall(async (data, context) => {
         status: "Not allowed"
     };
 });
-
 
 
 
