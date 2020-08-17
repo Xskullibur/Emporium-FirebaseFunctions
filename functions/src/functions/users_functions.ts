@@ -20,7 +20,7 @@ export const createUserIfNotExist =  functions.https.onCall(async (data, context
 
     if(isNewUser){
         //Add free points for new users
-        await addPoints(userId, 10)
+        await addPoints(userId, 250)
 
         return {
             status: "User Created"
